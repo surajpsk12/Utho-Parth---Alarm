@@ -1,0 +1,607 @@
+ANTIGRAVITY MASTER BUILD PROMPT PROJECT: Utho Parth - Alarm DOCUMENT
+PURPOSE: Complete product requirements and implementation instructions
+for Antigravity VERSION: 1.0
+
+====================================================================== 1.
+YOUR ROLE AND PRIMARY OBJECTIVE
+======================================================================
+
+Act as a senior Android engineer, product designer, and QA engineer.
+Build a polished, production-minded Android alarm application inspired
+by the general feature category of Alarmy (https://alar.my/en), but with
+its own original brand, UI, copy, icons, assets, and implementation.
+
+IMPORTANT PRODUCT DECISION: - Every feature described in this document
+must be available in the free version for now. - Do not implement
+subscriptions, paywalls, premium locks, paid tiers, ads, account
+requirements, or monetization flows. - The app should be offline-first
+and usable without sign-in or a backend. - Do not copy Alarmy’s
+proprietary assets, exact screens, branding, or text. Use it only as a
+functional reference. - Do not claim a feature is complete unless it is
+implemented and tested. If a feature cannot be implemented reliably
+under Android platform restrictions, explain the limitation and
+implement the safest supported alternative.
+
+Do not merely generate a plan or static mockups. Inspect the existing
+repository, then implement the application in working, testable
+increments. Preserve existing working code unless a change is necessary.
+If the repository is empty, create the project structure described
+below.
+
+======================================================================
+2. PRODUCT VISION
+======================================================================
+
+Build an all-in-one alarm, wake-up mission, bedtime audio, and basic
+sleep-tracking app. The key differentiator is that users can require
+themselves to complete one or more tasks before dismissing an alarm
+normally.
+
+Core priorities, in order: 1. Alarm delivery and audio reliability. 2.
+Clear alarm creation and management. 3. Mission completion and safe
+alarm dismissal behavior. 4. Reboot/time-change/permission recovery. 5.
+Accessible, polished UI. 6. Offline sleep sounds and basic sleep
+records. 7. Snore-event detection and other advanced functions, with
+clear privacy controls.
+
+Never sacrifice alarm reliability for decorative UI or secondary
+features.
+
+======================================================================
+3. OFFICIAL PRODUCT BRANDING
+======================================================================
+
+Official app name: Utho Parth - Alarm
+
+Branding requirements: - Treat “Utho Parth - Alarm” as the final and
+approved product name. Do not rename it or propose alternate names. -
+Use “Utho Parth - Alarm” in the app’s visible full-name locations,
+onboarding, About screen, documentation, and store-facing text. - Use
+“Utho Parth” as a compact display name only where a short label is
+genuinely needed, such as a constrained launcher label. Keep the full
+name as the official product name. - Create a distinctive original
+launcher icon and cohesive Material 3 color system. Do not copy Alarmy’s
+icon, logo, illustrations, screens, or other proprietary assets. - Keep
+the existing applicationId/package name unchanged unless the user
+explicitly requests a package-name change. - Do not add a company name,
+logo, or unsupported claims that the user has not supplied. - Keep the
+product free: no advertisements, subscriptions, paywalls, premium locks,
+or payment SDKs.
+
+======================================================================
+3. REQUIRED TECHNOLOGY AND ARCHITECTURE
+======================================================================
+
+Use: - Kotlin - Jetpack Compose - Material 3 - MVVM - Clean separation
+of UI, domain/use cases, repositories, and data sources - Hilt for
+dependency injection - Room for structured local data - DataStore for
+app preferences - Coroutines and Flow for asynchronous work and state -
+Android AlarmManager for scheduled alarms - BroadcastReceiver for
+scheduled alarm and system events - CameraX for camera-based missions -
+Android sensor APIs for motion/step-related missions, using supported
+sensors and fallbacks - Android audio APIs suitable for alarm playback
+and sleep audio - Android notification APIs and foreground services only
+where required by current platform rules - Unit tests and Android
+instrumentation/UI tests where practical
+
+Use current stable compatible dependency versions. Do not invent
+dependency versions. Inspect the existing Gradle configuration before
+editing it. Keep dependency versions centralized using the project’s
+existing version catalog if one exists.
+
+Suggested package structure (adapt to the existing package name if the
+repository already has one): - app/ - core/common/ -
+core/designsystem/ - core/permissions/ - core/audio/ - data/local/ -
+data/repository/ - domain/model/ - domain/repository/ -
+domain/usecase/ - feature/home/ - feature/alarms/ - feature/missions/ -
+feature/sleep/ - feature/sounds/ - feature/statistics/ -
+feature/settings/ - service/alarm/ - receiver/ - worker/ (only for work
+that is appropriate for WorkManager; do not use WorkManager for exact
+alarm delivery)
+
+Architecture rules: Compose UI -> ViewModel -> Use Case -> Repository ->
+Data Source. System alarm delivery must not depend on a screen,
+ViewModel, or the app process staying open. The system receiver/service
+path must be able to reconstruct the alarm state from persistent
+storage.
+
+Keep business logic out of Composables. Use immutable UI state and
+one-way data flow. Handle loading, empty, success, permission-denied,
+and error states. Avoid giant files and god classes.
+
+======================================================================
+4. DESIGN DIRECTION AND USER EXPERIENCE
+======================================================================
+
+Create an original, modern, calm-but-energetic design for Utho Parth -
+Alarm. The brand should feel bold, focused, dependable, and motivating
+at wake-up time.
+
+Design principles: - Material 3 components and consistent spacing. -
+Strong contrast and large touch targets. - Large, readable alarm time. -
+Simple alarm cards with clear enabled/disabled states. - Night-friendly
+dark theme and a clean light theme. - Support system theme selection. -
+Avoid clutter and excessive gradients. - Use subtle motion only when it
+improves feedback. - Provide accessible labels, TalkBack descriptions,
+scalable text, and clear focus order. - Do not rely on color alone to
+convey status. - The official app name is exactly: Utho Parth - Alarm.
+Use this name consistently wherever the full app name is appropriate. -
+Use “Utho Parth - Alarm” for the app title in onboarding,
+settings/about, store-facing copy, and project documentation. - For the
+Android launcher label, use “Utho Parth - Alarm” unless platform
+label-length constraints make a shorter label necessary; if shortened,
+use “Utho Parth” consistently and document the reason. - Create an
+original launcher icon and visual identity for Utho Parth - Alarm. Do
+not use placeholder branding now that the name is finalized. - Keep the
+existing applicationId/package name unchanged unless the user explicitly
+requests a package-name change. - No copied Alarmy screenshots, logos,
+illustrations, or proprietary assets. - Use local placeholder audio
+assets until properly licensed sound assets are supplied. - Do not
+download random copyrighted audio files.
+
+Primary navigation: 1. Alarm 2. Sleep 3. Sounds 4. Statistics
+
+Settings should be reachable from the main screen’s toolbar or a clearly
+visible settings action.
+
+Required screens: - Onboarding and permission explanation - Home/alarm
+dashboard - Alarm list - Add/edit alarm - Alarm detail/configuration -
+Mission selection and mission configuration - Active ringing alarm -
+Individual mission execution screens - Alarm success/completion -
+Wake-Up Check - Sleep session controls - Sleep dashboard/history - Snore
+events and recordings - Sleep sound library/player/mixer - Statistics
+and trends - Settings and permissions help - Empty states, error states,
+and permission-denied states
+
+======================================================================
+5. ALARM MANAGEMENT — ALL FREE
+======================================================================
+
+Implement: - Create, edit, delete, enable, and disable alarms. -
+Multiple simultaneous alarms. - One-time alarms. - Repeating alarms on
+selected weekdays. - Alarm labels, e.g. Office, Study, Gym. -
+Duplicate/copy alarm. - Alarm presets/templates. - Quick alarm for a
+duration from now. - Display next alarm and time remaining. - Alarm
+history: triggered, dismissed, missed, and completed. - Per-alarm sound
+selection. - Per-alarm volume behavior where supported. - Vibration
+toggle. - Gradual volume increase. - Configurable snooze duration. -
+Configurable snooze count or snooze policy. - Optional mission
+requirement. - Optional selection of one or more missions. - Optional
+Wake-Up Check after dismissal. - Configurable follow-up delay and number
+of checks. - 12/24-hour time format. - Correct handling of alarms
+crossing midnight. - Clear handling of
+daylight-saving/time-zone/device-clock changes. - Validate invalid or
+contradictory settings before saving.
+
+Alarm data should include a stable ID, enabled state, hour/minute,
+repeat weekdays, label, sound URI/asset ID, volume settings, vibration
+setting, snooze settings, mission configuration, follow-up settings,
+next scheduled occurrence, and timestamps as appropriate.
+
+Use Room migrations when the schema changes. Do not erase existing user
+alarms during an upgrade.
+
+======================================================================
+6. ALARM RELIABILITY AND ANDROID SYSTEM INTEGRATION
+======================================================================
+
+Treat this section as a critical requirement.
+
+Implement and test: - Exact alarm scheduling using the appropriate
+AlarmManager APIs and current Android permission rules. - Explain and
+request exact-alarm access when required; never repeatedly nag the
+user. - Notification permission handling on Android versions where
+required. - Full-screen alarm UI behavior only through permitted Android
+mechanisms and appropriate declarations. - Alarm notification and
+lock-screen presentation. - Correct audio startup and cleanup. -
+Repeating alarm rescheduling after a trigger. - Recovery after device
+reboot using a receiver where allowed. - Recalculation after device
+time/time-zone changes. - Detection of revoked/missing permissions and a
+clear route to relevant system settings. - Avoid duplicate scheduling
+and duplicate ringing from repeated broadcasts. - Persist alarm and
+active mission state before launching the alarm UI. - Handle process
+death/activity recreation as safely as possible. - Handle audio focus
+and interruptions, including calls or audio route changes, where the
+platform permits. - Battery optimization guidance for manufacturers
+whose background restrictions can affect reliability. - Test on multiple
+Android API levels and at least one manufacturer device beyond the
+emulator if available.
+
+Use a dedicated, carefully scoped alarm playback component/service as
+required by Android. Do not use WorkManager for exact clock-time alarm
+delivery. Use WorkManager only for deferrable background tasks.
+
+Platform limitations: - Do not promise an alarm will always fire if the
+user force-stops the app, disables permissions, powers off the phone, or
+the manufacturer blocks execution. - Follow the current Android rules
+for starting foreground services, full-screen intents, notifications,
+camera, and microphone. - Never use deceptive permission prompts or
+attempt to bypass Android restrictions. - Provide a useful explanation
+when a system permission is unavailable.
+
+Create a manual QA checklist for: - Screen locked - App in background -
+App process removed by system - Device reboot - Exact alarm permission
+denied/re-enabled - Notification permission denied - Device time
+changed - Time zone changed - DND/silent mode behavior and documented
+limitations - Headphones connected/disconnected - Alarm disabled/deleted
+just before trigger - Multiple alarms near the same time - Mission
+screen recreation - Low battery and battery saver
+
+======================================================================
+7. WAKE-UP MISSIONS — ALL FREE
+======================================================================
+
+Implement these eight mission types. Each mission must have a clear
+setup flow, instructions, progress, success/failure feedback, and
+persisted completion state.
+
+7.1 Math Mission - Generate arithmetic questions. - Difficulty levels:
+easy, medium, hard. - Configurable question count. - Validate answers. -
+Prevent a blank/invalid answer from counting as correct. - Avoid
+repeatedly showing the same trivial questions in one session.
+
+7.2 Memory Mission - Display a sequence of tiles or symbols. - User
+repeats the sequence. - Configurable sequence length/difficulty. - Clear
+visual/audio accessibility options where practical.
+
+7.3 Shake Mission - Use accelerometer data to detect deliberate
+shakes. - Configurable target count and difficulty. - Filter noisy
+sensor events and prevent a single movement from counting many times. -
+Explain when the required sensor is unavailable.
+
+7.4 Typing Mission - Display a phrase to type. - Configurable phrase
+length/difficulty. - Validate the entered phrase according to a
+documented normalization policy. - Provide accessible keyboard focus and
+text sizing.
+
+7.5 Squat Mission - Use supported device sensors/camera-based estimation
+only if feasible and reliable. - Explain setup and placement
+instructions. - Calibrate or validate movement to reduce accidental
+counting. - Provide a fallback mission if reliable squat detection is
+unavailable. - Do not claim accurate exercise recognition without
+testing.
+
+7.6 QR/Barcode Mission - Let the user scan and register a QR
+code/barcode before the alarm. - At alarm time, require scanning the
+registered code. - Validate the scanned value against the saved value. -
+Handle camera permission denial and unavailable camera.
+
+7.7 Walking Mission - Count steps using supported step counter/detector
+sensors where available. - Request activity-recognition permission if
+required by the Android version. - Configure step target. - Explain when
+hardware support is missing and provide a fallback.
+
+7.8 Photo Mission - Allow the user to capture/register a reference scene
+before the alarm. - At alarm time, capture a new image and compare it
+with the reference using a documented, on-device approximate matching
+strategy. - Do not require exact pixel equality. - Explain
+lighting/framing limitations. - Handle camera permission denial and
+unavailable camera. - Do not upload images to a server.
+
+Mission framework: - Allow one or more missions per alarm. - Support a
+user-configured combination/all-selected policy where practical. - Allow
+difficulty and target settings per alarm. - Save mission
+progress/completion. - Returning from a mission must not automatically
+dismiss the alarm. - Do not stop the alarm just because a mission screen
+opens or the app returns to foreground. - Mission completion must be
+verified by domain logic, not by a UI button that blindly marks
+success. - Handle app/process recreation without losing mission
+configuration. - Offer a clearly accessible emergency stop/escape path
+for safety and accessibility. Document that emergency stop can stop
+ringing even if a mission is incomplete; do not falsely claim the app
+can make the phone impossible to silence.
+
+======================================================================
+8. ANTI-SNOOZE AND WAKE-UP CHECK — ALL FREE
+======================================================================
+
+Implement: - Optional anti-snooze mode. - Mission-based normal
+dismissal. - Configurable snooze policy. - Wake-Up Check after the main
+alarm is dismissed. - Configurable follow-up delay. - Optional mission
+for the follow-up check. - Configurable number of follow-up checks. -
+Follow-up notification/alarm scheduling using supported APIs. - Record
+whether each check was completed, missed, or cancelled. - Wake-up
+completion statistics. - Optional volume escalation within device/stream
+limits. - Clear controls so users understand how the feature works.
+
+Do not create an infinite alarm loop. Always provide emergency stop and
+allow the user to disable future checks from settings. Ensure follow-up
+scheduling is idempotent and cleaned up when the alarm/check is deleted
+or disabled.
+
+======================================================================
+9. ALARM SOUND LIBRARY AND AUDIO
+======================================================================
+
+Implement: - Built-in sound library using only included/licensed
+assets. - Sound preview. - Sound categories: loud, gentle, nature,
+electronic, and custom. - Per-alarm sound selection. - User-selected
+local audio files using Android’s supported file picker. - Playback
+looping until normal dismissal. - Gradual volume ramp. -
+User-configurable vibration. - Optional random sound from a selected
+category/favorites. - Record a custom wake-up voice message if
+microphone permission is granted. - Clear audio focus/interruption
+handling. - Show the selected sound and volume behavior in alarm
+settings. - Provide a default sound even when no custom assets are
+present.
+
+Do not claim the app can override hardware volume limits or every
+silent/DND configuration. Explain behavior clearly. Use appropriate
+audio attributes and focus handling. Stop and release playback resources
+correctly.
+
+======================================================================
+10. SLEEP TRACKING AND REPORTS — ALL FREE
+======================================================================
+
+Implement a simple, privacy-conscious sleep journal: - Start and end a
+sleep session manually. - Store session start/end timestamps. -
+Calculate recorded session duration. - Set target bedtime and wake-up
+time. - View sleep-session history. - View daily/weekly/monthly duration
+trends. - Add user notes. - Let the user rate how rested they feel. -
+Morning summary of the latest session. - Optional estimated sleep score
+with transparent, simple documented logic. - Display consistency trends
+for bedtime and wake-up time. - Distinguish recorded time in a session
+from actual measured sleep. - Do not claim medical-grade sleep-stage
+tracking without appropriate sensors/data. - Permit editing/deleting
+sessions and deleting all sleep data. - Handle overnight sessions and
+date boundaries correctly.
+
+======================================================================
+11. SNORE DETECTION AND RECORDING — ALL FREE
+======================================================================
+
+Implement as an optional feature, disabled until the user explicitly
+enables it: - Explain microphone use before requesting permission. -
+Start/stop sleep audio monitoring explicitly. - Detect possible snoring
+events using on-device audio analysis if feasible. - Store event
+timestamps and confidence/metadata. - Optionally save short audio clips
+around detected events, only when the user has enabled recording. -
+Provide a timeline and playback screen. - Allow deletion of individual
+clips and all recordings. - Clearly indicate when monitoring is
+active. - Provide storage-management controls and a maximum storage
+policy. - Avoid uploading audio or recordings. - Avoid keeping the
+microphone active after the session is stopped. - Respect current
+Android microphone/foreground-service restrictions. - Handle permission
+denial gracefully and keep other app functions usable.
+
+Do not diagnose sleep apnea or other medical conditions. Label results
+as possible snoring events, not a clinical diagnosis. If reliable
+continuous monitoring cannot be implemented under the target Android
+version and background restrictions, explain the limitation and
+implement a clearly bounded supported session instead of pretending it
+works.
+
+======================================================================
+12. SLEEP SOUNDS AND MIXER — ALL FREE
+======================================================================
+
+Implement: - Offline sleep-sound library with properly licensed local
+assets. - Categories such as rain, wind, forest, birds, white noise, and
+ambient sound. - Play/pause/stop. - Loop playback. - Sleep timer. -
+Optional gradual fade-out. - Favorites. - Background playback with
+appropriate Android media behavior. - Multiple simultaneous sounds with
+independent volume controls, if the audio implementation supports it
+reliably. - Save and load user-created sound mixes. - Restore the last
+mix where appropriate. - Stop playback and release resources when
+requested. - Display current playback state in the UI/notification where
+required.
+
+If no audio assets are present, build the library architecture and
+empty/download-free state, include a small set of original/generated
+placeholder tones only if appropriate, and document the exact asset
+format/folder needed. Do not silently use copyrighted audio.
+
+======================================================================
+13. DAILY ROUTINES AND HABITS — ALL FREE
+======================================================================
+
+Implement: - Bedtime reminder. - Target sleep duration. - Configurable
+sleep schedule. - Morning routine checklist. - Daily wake-up goal. -
+Routine completion history. - Bedtime/wake-up consistency summaries. -
+Habit reminders. - Reusable routine templates. - Enable/disable
+individual reminders. - Local notifications only; no account or server
+required.
+
+Avoid medical or prescriptive claims about sleep. Let users customize or
+disable all routine features.
+
+======================================================================
+14. STATISTICS, HISTORY, AND WIDGET
+======================================================================
+
+Statistics: - Completed alarms. - Missed alarms. - Alarm dismissal
+time. - Mission success/failure. - Wake-Up Check completion. -
+Sleep-session duration history. - Sleep schedule consistency. - Basic
+weekly/monthly charts. - Empty states when no data exists. - Clear
+labels explaining what each statistic means. - Data deletion controls.
+
+History: - Recent alarm events with date/time and outcome. - Filters
+where useful. - Do not store more sensitive information than necessary.
+
+Home-screen widget: - Show next alarm time and enabled state. - Provide
+a quick route to add/open alarms. - Refresh after alarm changes and
+system events. - Use supported Android widget APIs and appropriate
+update strategy. - Do not promise second-by-second countdown updates if
+platform limits make that impractical.
+
+======================================================================
+15. SETTINGS, ACCESSIBILITY, AND PRIVACY
+======================================================================
+
+Implement: - Light/dark/system theme. - 12/24-hour time preference. -
+Default alarm sound and vibration. - Default snooze settings. - Default
+mission and difficulty. - Notification and exact-alarm permission
+status. - Clear permission explanation and route to system settings. -
+Battery-restriction guidance. - Language-ready string resources; do not
+hardcode user-facing strings throughout the app. - Accessible labels and
+scalable text. - Reduced-motion-friendly behavior where practical. -
+Data export only if implemented safely and clearly. - Delete alarm
+history. - Delete sleep sessions. - Delete snore recordings. - Delete
+all local app data through a clear in-app flow. - Privacy information
+describing local storage, microphone, camera, and activity sensor use.
+
+Request camera, microphone, activity-recognition, notification, and
+exact-alarm access only when needed. Never request all permissions at
+first launch without explaining why. Denied optional permissions must
+not prevent basic alarms from working.
+
+======================================================================
+16. LOCAL DATA MODEL
+======================================================================
+
+Design Room entities and relationships for at least: - AlarmEntity -
+AlarmRepeatDayEntity or an equivalent normalized weekday
+representation - MissionConfigEntity - AlarmMissionEntity / mission
+configuration relation - AlarmEventEntity - WakeUpCheckEntity -
+SleepSessionEntity - SleepNoteEntity or note field where appropriate -
+SnoreEventEntity - SnoreRecordingEntity or a safe reference to a local
+file - SoundMixEntity - SoundMixTrackEntity - RoutineEntity -
+RoutineItemEntity - RoutineCompletionEntity - App preferences in
+DataStore
+
+Use stable IDs, foreign keys where appropriate, indices for common
+queries, type converters where necessary, and Room migrations. Store
+file URIs/paths carefully and handle deleted/moved files. Never store
+raw audio/image blobs in Room if a file reference is more appropriate.
+
+Write repository interfaces in the domain layer and implementations in
+the data layer. Add use cases for critical actions such as CreateAlarm,
+UpdateAlarm, ScheduleAlarm, CancelAlarm, HandleAlarmTrigger,
+CompleteMission, StartSleepSession, EndSleepSession, and
+DeleteSleepData.
+
+======================================================================
+17. ERROR HANDLING AND EDGE CASES
+======================================================================
+
+Handle: - User denies permissions. - Sensor unavailable. - Camera
+unavailable. - Audio file moved/deleted. - Alarm deleted while
+scheduled. - Alarm disabled while scheduled. - Duplicate broadcasts. -
+App process recreated. - Device reboot. - Device clock/time zone
+changed. - Multiple alarms close together. - Invalid alarm
+configuration. - Database migration failure paths where feasible. -
+Storage full. - Microphone permission revoked. - Sleep session left open
+overnight. - Sound playback interrupted. - User exits a mission. -
+Mission target cannot be reached due to unsupported hardware. - App
+launched after a missed alarm. - Daylight-saving/time-zone transitions
+where applicable.
+
+Provide useful user-facing errors and logs suitable for debugging. Do
+not expose sensitive recorded audio or private data in logs.
+
+======================================================================
+18. TESTING REQUIREMENTS
+======================================================================
+
+Create automated tests for: - Alarm repeat-day calculations. - Next
+occurrence calculations. - One-time alarm behavior. - Snooze
+calculations. - Mission answer validation. - Mission completion rules. -
+Wake-Up Check scheduling/cancellation logic. - Sleep duration across
+midnight. - Statistics aggregation. - Repository and Room behavior. -
+DataStore preferences. - Duplicate scheduling prevention.
+
+Add integration/manual test instructions for: - Alarm trigger on a
+locked phone. - Reboot recovery. - Exact-alarm permission denied and
+granted. - Notification permission denied. - App process killed by the
+system. - User force-stop limitation documentation. - Time/time-zone
+changes. - Alarm and mission state recovery. - Camera, microphone, and
+activity permission denial. - Custom sound missing. - Sleep audio
+background playback. - Audio recording cleanup. - Theme and font
+scaling. - TalkBack navigation. - Multiple alarms at close times.
+
+Do not mark a feature complete based only on compilation. Run available
+Gradle tests and builds, inspect failures, and fix them. Report tests
+that could not be run and why.
+
+======================================================================
+19. IMPLEMENTATION WORKFLOW FOR ANTIGRAVITY
+======================================================================
+
+Follow this workflow:
+
+STEP 1 — INSPECT - Inspect the repository, existing package name, Gradle
+setup, SDK levels, dependencies, and current code. - Identify existing
+implementations that should be preserved. - Report any major constraints
+before making destructive changes.
+
+STEP 2 — PLAN - Create/update a concise implementation plan and task
+checklist. - Separate critical alarm reliability work from optional
+sleep and audio features. - Identify permissions and Android API
+constraints.
+
+STEP 3 — FOUNDATION - Set up architecture, dependency injection, Room,
+DataStore, navigation, theme, and shared UI components. - Ensure the
+project compiles.
+
+STEP 4 — ALARM MVP - Implement create/edit/delete/enable/disable/repeat
+alarms. - Implement scheduling, ringing audio, dismissal, snooze, reboot
+recovery, and system permission flows. - Add tests before moving to
+advanced missions.
+
+STEP 5 — MISSIONS - Implement each of the eight mission types one by
+one. - Add configuration, validation, persistence, and failure
+handling. - Do not use fake mission-completion buttons.
+
+STEP 6 — WAKE-UP CHECK - Implement follow-up scheduling and cancellation
+safely. - Add statistics and tests.
+
+STEP 7 — SOUNDS AND SLEEP - Implement local sound library, sleep timer,
+sleep sessions, reports, and routines. - Then implement snore detection
+and recording with privacy controls and supported platform behavior.
+
+STEP 8 — POLISH - Add widget, accessibility, themes, empty/error states,
+and statistics charts. - Confirm every screen has functional navigation.
+
+STEP 9 — VERIFY - Run Gradle build and tests. - Fix compile errors,
+crashes, lifecycle bugs, and major UI defects. - Review permissions and
+Android manifest declarations. - Provide a feature checklist with
+statuses: implemented, tested, partially implemented, blocked by
+platform/asset requirement. - Document setup instructions, required
+audio asset locations/formats, known limitations, and manual QA steps.
+
+Do not attempt to create every feature in one giant code-generation step
+if that would compromise correctness. Work incrementally, keep the
+project compiling after each milestone, and continue through the
+milestones unless blocked. Do not stop after producing only a plan or
+mock UI.
+
+======================================================================
+20. DEFINITION OF DONE
+======================================================================
+
+The project is not done until: - The app builds successfully. - Users
+can create and manage alarms. - Scheduled alarms ring under tested
+supported conditions even when the UI is not open. - Repeat alarms and
+reboot recovery work where Android permits. - Mission configuration
+persists. - Each implemented mission validates actual
+input/sensor/camera results rather than a fake success action. - Normal
+dismissal follows the selected mission policy. - Emergency stop remains
+available. - Wake-Up Check can be scheduled, completed, and cancelled
+safely. - Sound playback resources are cleaned up. - Sleep data and
+recordings have deletion controls. - Permissions are requested
+contextually. - All features remain free and there are no paywalls, ads,
+subscriptions, or sign-in gates. - Unit tests and available build checks
+pass. - Remaining platform restrictions, missing assets, and
+unimplemented items are documented honestly.
+
+======================================================================
+21. FINAL INSTRUCTIONS
+======================================================================
+
+The finalized product name is Utho Parth - Alarm. Start by inspecting
+the existing project. Then implement the app incrementally, prioritizing
+alarm correctness over feature count. Apply the finalized name across
+the app UI, launcher label/icon, onboarding, settings/about, and
+documentation, with original branding and a polished Material 3 design.
+Keep all requested features free for now. Do not add premium tiers,
+payment SDKs, ads, analytics that collect personal data, cloud accounts,
+or mandatory internet access.
+
+When finished, report: 1. What was implemented. 2. Files/modules created
+or changed. 3. Build/test results. 4. Permissions required and why. 5.
+Features that need physical-device testing. 6. Audio assets still
+needed. 7. Known Android platform limitations. 8. Exact next steps to
+run and test the application.
+
+END OF MASTER PROMPT
